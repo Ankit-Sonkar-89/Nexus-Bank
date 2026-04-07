@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexusBank | Digital Banking</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* 🔥 MATCHING ADMIN VAULT PREMIUM COLORS 🔥 */
+        :root { 
+            --bg-dark: #020617; 
+            --card-bg: rgba(15, 23, 42, 0.7); 
+            --primary: #0ea5e9; /* Cyan */
+            --secondary: #8b5cf6; /* Purple */
+            --text-main: #f8fafc; 
+            --text-muted: #94a3b8; 
+            --success: #10b981; 
+            --danger: #ef4444; 
+            --border: rgba(255, 255, 255, 0.1); 
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Outfit', sans-serif;}
+        body { background-color: var(--bg-dark); color: var(--text-main); display: flex; justify-content: center; padding: 40px 20px; min-height: 100vh; background-image: radial-gradient(circle at top left, rgba(14, 165, 233, 0.15), transparent 40%), radial-gradient(circle at bottom right, rgba(139, 92, 246, 0.15), transparent 40%); }
+        
+        .dashboard-container { max-width: 1100px; width: 100%; display: grid; grid-template-columns: 350px 1fr; gap: 30px; }
+        .card { background: var(--card-bg); backdrop-filter: blur(20px); border: 1px solid var(--border); border-radius: 24px; padding: 30px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5); }
+        .card-header { font-size: 18px; font-weight: 600; color: var(--text-main); margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 15px;}
+        
+        /* Profile Details */
+        .avatar { width: 80px; height: 80px; background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 700; margin: 0 auto 15px; box-shadow: 0 0 20px rgba(14, 165, 233, 0.4); }
+        .acc-toggle { background: rgba(255,255,255,0.05); padding: 6px 12px; border-radius: 8px; font-family: monospace; font-size: 14px; cursor: pointer; transition: 0.3s; display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--border); margin-top: 5px; color: var(--primary);}
+        .acc-toggle:hover { background: rgba(14, 165, 233, 0.1); border-color: var(--primary); box-shadow: 0 0 10px rgba(14, 165, 233, 0.2);}
+        
+        .profile-box { background: rgba(0,0,0,0.3); border-radius: 12px; padding: 15px; margin-top: 20px; text-align: left; border: 1px solid var(--border);}
+        .p-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 13px; border-bottom: 1px dashed var(--border); padding-bottom: 5px;}
+        .p-row:last-child { border: none; margin: 0; padding: 0;}
+        .p-lbl { color: var(--text-muted); text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px;} .p-val { font-weight: 600; color: white;}
+
+        .balance-card { background: linear-gradient(135deg, rgba(14, 165, 233, 0.1), rgba(139, 92, 246, 0.1)); border: 1px solid rgba(14, 165, 233, 0.2); border-radius: 16px; padding: 25px; text-align: center; margin-top: 20px;}
+        .balance-value { font-size: 36px; font-weight: 700; color: var(--text-main); letter-spacing: -1px; margin-top: 5px; text-shadow: 0 0 15px rgba(14, 165, 233, 0.3);}
+
+        input { width: 100%; background: rgba(0,0,0,0.4); border: 1px solid var(--border); color: white; padding: 14px; border-radius: 12px; margin-bottom:15px; outline: none; transition: 0.3s;}
+        input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2); }
+        .btn-primary { width: 100%; background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; border: none; padding: 16px; border-radius: 12px; font-weight: 700; font-size: 15px; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; transition: 0.3s; box-shadow: 0 10px 20px -10px var(--primary); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 15px 25px -10px var(--primary); }
+        
+        /* 🔒 OTP LOGIN OVERLAY */
+        #loginOverlay { position: fixed; inset: 0; background: rgba(2, 6, 23, 0.95); z-index: 1000; display: flex; justify-content: center; align-items: center; backdrop-filter: blur(15px);}
+        .login-box { background: var(--card-bg); padding: 40px; border-radius: 24px; border: 1px solid var(--primary); text-align: center; width: 400px; box-shadow: 0 0 40px rgba(14, 165, 233, 0.2);}
+        .login-box h2 { font-size: 28px; margin-top: 0; color: var(--text-main); display: flex; align-items: center; justify-content: center; gap: 10px;}
+
+        /* Passbook Table */
+        .table-container { overflow-y: auto; max-height: 300px; padding-right: 10px; }
+        .txn-item { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--border); transition: 0.2s;}
+        .txn-item:hover { background: rgba(14, 165, 233, 0.05); border-radius: 8px; padding: 16px 10px;}
+        .txn-title { font-weight: 500; font-size: 15px; color: var(--text-main);}
+        .txn-date { font-size: 12px; color: var(--text-muted); margin-top: 4px;}
+        .txn-amount { font-weight: 700; font-size: 18px; }
+        .credit { color: var(--success); } .debit { color: var(--text-main); }
+        .status-badge { padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 700; letter-spacing: 0.5px; margin-left: 10px;}
+        .status-success { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+
+        /* Toast */
+        #toast { position: fixed; bottom: 30px; right: 30px; background: #0f172a; color: white; padding: 16px 24px; border-radius: 12px; font-size: 14px; font-weight: 500; display: none; box-shadow: 0 15px 30px -5px rgba(0,0,0,0.5); z-index: 10000; border-left: 4px solid var(--primary); }
+    </style>
+</head>
+<body>
+
+    <!-- 🔥 ASALI OTP LOGIN SCREEN 🔥 -->
+    <div id="loginOverlay">
+        <div class="login-box" id="loginStep1">
+            <h2>🏦 Secure Login</h2>
+            <p style="color: var(--text-muted); font-size:14px; margin-bottom: 25px;">Enter your 12-digit Account Number and registered Email.</p>
+            <input type="number" id="lAccNo" placeholder="Account Number (e.g. 100000000001)">
+            <input type="email" id="lEmail" placeholder="Registered Email">
+            <button class="btn-primary" onclick="requestLoginOtp()">Send Secure OTP ⚡</button>
+        </div>
+        <div class="login-box" id="loginStep2" style="display:none;">
+            <h2>🔐 Verify OTP</h2>
+            <p style="color: var(--text-muted); font-size:14px; margin-bottom: 25px;">Check your email for the 6-digit code.</p>
+            <input type="text" id="lOtp" placeholder="• • • • • •" style="text-align: center; font-size: 24px; letter-spacing: 8px; font-weight: bold;" maxlength="6">
+            <button class="btn-primary" onclick="verifyLoginOtp()">Unlock Dashboard 🔓</button>
+        </div>
+    </div>
+
+    <!-- MAIN DASHBOARD (Locked behind blur) -->
+    <div class="dashboard-container" style="filter: blur(10px); pointer-events: none;" id="mainUI">
+        
+        <!-- LEFT COLUMN: Profile & Balance -->
+        <div class="card">
+            <div style="text-align:center;">
+                <div class="avatar" id="userInitial">N</div>
+                <h2 id="userName" style="font-size: 24px; margin-bottom: 5px;">Nexus Bank</h2>
+                
+                <!-- 🔥 The Eye Toggle Feature -->
+                <div class="acc-toggle" onclick="toggleAccDisplay()" id="accDisplayBox">
+                    <span id="accDisplay">A/C: ••••••••Loading</span> 👁️
+                </div>
+            </div>
+
+            <!-- 🔥 Full Profile Box -->
+            <div class="profile-box">
+                <div class="p-row"><span class="p-lbl">Email</span><span class="p-val" id="pEmail">--</span></div>
+                <div class="p-row"><span class="p-lbl">Phone</span><span class="p-val" id="pPhone">--</span></div>
+                <div class="p-row"><span class="p-lbl">Aadhaar</span><span class="p-val" id="pAadhar">--</span></div>
+                <div class="p-row"><span class="p-lbl">DOB</span><span class="p-val" id="pDob">--</span></div>
+                <div class="p-row"><span class="p-lbl">KYC Status</span><span class="p-val" style="color:var(--success);">✅ VERIFIED</span></div>
+            </div>
+
+            <div class="balance-card">
+                <div style="font-size: 13px; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Available Balance</div>
+                <div class="balance-value" id="liveBalance">₹ 0.00</div>
+            </div>
+        </div>
+
+        <!-- RIGHT COLUMN: Transfer & Passbook -->
+        <div style="display: flex; flex-direction: column; gap: 30px;">
+            <div class="card">
+                <div class="card-header">💸 Instant Transfer (IMPS)</div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <input type="number" id="payeeAcc" placeholder="Receiver Account">
+                    <input type="number" id="payAmount" placeholder="Amount (₹)">
+                </div>
+                <button class="btn-primary" onclick="initiateTransfer()">Send Money Safely 🚀</button>
+            </div>
+            
+            <div class="card" style="flex: 1;">
+                <div class="card-header">
+                    <span>📜 Digital Passbook</span>
+                    <button style="background: none; border: none; color: var(--primary); cursor: pointer; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;" onclick="loadDashboard()">↻ Refresh</button>
+                </div>
+                <div class="table-container" id="passbookContainer"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast">Message</div>
+
+    <script>
+        const API_BASE = "http://localhost:8086/api/bank";
+        let activeAccount = null;
+        let isAccHidden = true;
+
+        const formatMoney = (amount) => "₹ " + parseFloat(amount).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+        function showToast(msg, isError = false) {
+            const toast = document.getElementById("toast");
+            toast.innerText = msg;
+            toast.style.display = "block";
+            toast.style.borderLeftColor = isError ? "var(--danger)" : "var(--success)";
+            setTimeout(() => toast.style.display = "none", 4000);
+        }
+
+        // 🔥 Toggle Account Number Visibility
+        function toggleAccDisplay() {
+            if(!activeAccount) return;
+            isAccHidden = !isAccHidden;
+            const displayStr = isAccHidden ? `••••••••${activeAccount.slice(-4)}` : activeAccount;
+            document.getElementById('accDisplay').innerText = `A/C: ${displayStr}`;
+        }
+
+        async function requestLoginOtp() {
+            const email = document.getElementById('lEmail').value.trim();
+            if(!email) return showToast("Email required!", true);
+            await fetch(`${API_BASE}/send-otp`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({email: email, purpose: "Login"}) });
+            document.getElementById('loginStep1').style.display = 'none';
+            document.getElementById('loginStep2').style.display = 'block';
+            showToast("OTP Sent to your Email!");
+        }
+
+        async function verifyLoginOtp() {
+            const accNo = document.getElementById('lAccNo').value.trim();
+            const otp = document.getElementById('lOtp').value.trim();
+            
+            const res = await fetch(`${API_BASE}/customer-login`, {
+                method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({accountNo: accNo, otp: otp})
+            });
+            const data = await res.json();
+
+            if(data.success) {
+                activeAccount = accNo;
+                document.getElementById('loginOverlay').style.display = 'none';
+                document.getElementById('mainUI').style.filter = 'none';
+                document.getElementById('mainUI').style.pointerEvents = 'all';
+                
+                document.getElementById('userName').innerText = data.customerName;
+                document.getElementById('userInitial').innerText = data.customerName.charAt(0);
+                toggleAccDisplay(); // Initially hide it
+                
+                showToast("Login Successful!");
+                loadDashboard();
+            } else { showToast("Invalid Credentials or OTP!", true); }
+        }
+
+        async function loadDashboard() {
+            // 🔥 Fetch Profile Details
+            const profRes = await fetch(`${API_BASE}/customer-profile/${activeAccount}`);
+            const pData = await profRes.json();
+            
+            document.getElementById('liveBalance').innerText = formatMoney(pData.account.currentBalance);
+            document.getElementById('pEmail').innerText = pData.customer.mailId;
+            document.getElementById('pPhone').innerText = pData.customer.contactNo;
+            document.getElementById('pAadhar').innerText = `XXXX-XXXX-${pData.customer.aadharNo.slice(-4)}`; // Masking Aadhar
+            document.getElementById('pDob').innerText = pData.customer.dob || 'N/A';
+
+            // Fetch Statement
+            const stmtRes = await fetch(`${API_BASE}/statement/${activeAccount}`);
+            const txns = await stmtRes.json();
+            
+            const container = document.getElementById('passbookContainer');
+            if(txns.length === 0) { container.innerHTML = "<div style='text-align:center; padding: 20px; color:var(--text-muted);'>No transactions.</div>"; return; }
+
+            container.innerHTML = "";
+            txns.forEach(t => {
+                const isCredit = String(t.receiverAccount) === activeAccount;
+                const sign = isCredit ? "+" : "-";
+                const color = isCredit ? "var(--success)" : "white";
+                const title = isCredit ? (t.senderAccount ? `From A/C ${t.senderAccount}` : `Bank Deposit`) : `To A/C ${t.receiverAccount}`;
+                
+                container.innerHTML += `<div class="txn-item">
+                    <div>
+                        <div class="txn-title">${title}</div>
+                        <div class="txn-date">${new Date(t.txnTimestamp).toLocaleDateString()} • ${t.remarks} <span class="status-badge status-success">SUCCESS</span></div>
+                    </div>
+                    <strong style="color:${color}; font-size:18px;">${sign}${formatMoney(t.amount)}</strong>
+                </div>`;
+            });
+        }
+
+        async function initiateTransfer() {
+            const receiverAcc = document.getElementById('payeeAcc').value;
+            const amount = document.getElementById('payAmount').value;
+            if(!receiverAcc || !amount) return showToast("Enter details!", true);
+
+            const payload = { senderAcc: activeAccount, receiverAcc: receiverAcc, amount: parseFloat(amount), remarks: "IMPS Transfer" };
+            const res = await fetch(`${API_BASE}/transfer`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            const data = await res.json();
+
+            if(data.status === 'SUCCESS') {
+                showToast(`✅ ${data.message}`);
+                document.getElementById('payAmount').value = '';
+                loadDashboard(); 
+            } else { showToast(`⚠️ ${data.message}`, true); }
+        }
+    </script>
+</body>
+</html>

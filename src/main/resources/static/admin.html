@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexusBank | Admin Vault</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg-dark: #020617; --card-bg: rgba(15, 23, 42, 0.7); --primary: #0ea5e9; --secondary: #8b5cf6; --text-main: #f8fafc; --text-muted: #94a3b8; --success: #10b981; --border: rgba(255, 255, 255, 0.1); }
+        body { font-family: 'Outfit', sans-serif; background-color: var(--bg-dark); color: var(--text-main); margin: 0; padding: 40px; background-image: radial-gradient(circle at 50% 0%, rgba(14, 165, 233, 0.15), transparent 50%); }
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 20px; margin-bottom: 30px; max-width: 1200px; margin: 0 auto 30px auto; }
+        .header h1 { margin: 0; font-size: 28px; background: linear-gradient(to right, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;} 
+        .nav-btn { background: rgba(14, 165, 233, 0.1); border: 1px solid var(--primary); color: var(--primary); padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; transition: 0.3s;}
+        .nav-btn:hover { background: var(--primary); color: white; box-shadow: 0 0 20px rgba(14, 165, 233, 0.4); }
+        
+        .grid { display: grid; grid-template-columns: 1fr 2.5fr; gap: 30px; max-width: 1200px; margin: 0 auto; }
+        .card { background: var(--card-bg); backdrop-filter: blur(20px); padding: 30px; border-radius: 20px; border: 1px solid var(--border); box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+        .card h2 { margin-top: 0; border-bottom: 1px solid var(--border); padding-bottom: 15px; margin-bottom: 20px; font-size: 20px;}
+        
+        .form-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px;}
+        label { font-size: 12px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 1px;}
+        input, select { background: rgba(0,0,0,0.4); border: 1px solid var(--border); padding: 14px; border-radius: 10px; color: white; outline: none; font-family: 'Outfit'; font-size: 14px; transition: 0.3s;}
+        input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2); }
+        .btn { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; padding: 16px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; transition: 0.3s; width: 100%; margin-top: 10px; font-size: 15px; text-transform: uppercase; letter-spacing: 1px;}
+        .btn:hover { box-shadow: 0 10px 25px -5px var(--primary); transform: translateY(-2px); }
+
+        table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        th { text-align: left; padding: 15px; color: var(--text-muted); background: rgba(0,0,0,0.4); border-bottom: 1px solid var(--border); position: sticky; top: 0; backdrop-filter: blur(10px);}
+        td { padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.02); cursor: pointer; transition: 0.2s;}
+        tr:hover td { background: rgba(14, 165, 233, 0.1); }
+        .acc-badge { font-family: monospace; color: var(--primary); background: rgba(14, 165, 233, 0.1); padding: 4px 8px; border-radius: 6px; font-weight: 600;}
+
+        /* 🔥 PREMIUM MODAL FOR CUSTOMER DETAILS */
+        #customerModal { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .modal-content { background: var(--card-bg); border: 1px solid var(--primary); border-radius: 24px; padding: 40px; width: 450px; box-shadow: 0 0 40px rgba(14, 165, 233, 0.2); position: relative; animation: popIn 0.3s ease; }
+        @keyframes popIn { from { transform: scale(0.9); opacity: 0;} to { transform: scale(1); opacity: 1;} }
+        .close-btn { position: absolute; top: 20px; right: 20px; background: none; border: none; color: var(--text-muted); font-size: 20px; cursor: pointer; }
+        .close-btn:hover { color: white; }
+        .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; }
+        .detail-box { background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; border: 1px solid var(--border); }
+        .detail-lbl { font-size: 11px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 5px;}
+        .detail-val { font-size: 15px; font-weight: 600; color: white;}
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>🏦 NexusBank Admin Vault</h1>
+        <a href="/index.html" class="nav-btn">← Switch to Customer Portal</a>
+    </div>
+
+    <div class="grid">
+        <!-- Account Creation -->
+        <div class="card" id="stepForm">
+            <h2>➕ Open New Account</h2>
+            <div class="form-group"><label>Full Name</label><input type="text" id="cName" placeholder="e.g. Suresh Kumar"></div>
+            <div class="form-group"><label>Date of Birth</label><input type="date" id="cDob"></div>
+            <div class="form-group"><label>Email Address</label><input type="email" id="cEmail" placeholder="suresh@gmail.com"></div>
+            <div class="form-group"><label>Contact No</label><input type="text" id="cPhone" placeholder="10-digit number"></div>
+            <div class="form-group"><label>Aadhaar (KYC)</label><input type="text" id="cAadhaar" placeholder="12-digit Aadhaar"></div>
+            <button class="btn" id="otpBtn" onclick="sendOtp()">Send Verification OTP ⚡</button>
+            <div id="loader" style="display:none; color:var(--primary); text-align:center; margin-top:15px; font-weight: 600;">Sending Encrypted Email...</div>
+        </div>
+
+        <div class="card" id="stepVerify" style="display: none; height: fit-content;">
+            <h2>🔐 Verify Customer</h2>
+            <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 20px;">Enter the 6-digit OTP sent to the customer's email.</p>
+            <div class="form-group"><label>Enter OTP</label><input type="text" id="cOtp" style="text-align: center; letter-spacing: 8px; font-size: 24px; font-weight: bold;" maxlength="6"></div>
+            <button class="btn" onclick="verifyAndCreate()">Verify & Create Account 🚀</button>
+        </div>
+
+        <!-- Live Accounts Table -->
+        <div class="card" style="overflow-y: auto; max-height: 600px; padding: 0;">
+            <h2 style="margin: 25px 25px 0 25px;">📡 Live Accounts Registry <span style="font-size:12px; color:var(--text-muted); font-weight:400;">(Click row for details)</span></h2>
+            <table style="margin-top: 15px;">
+                <thead><tr><th>Customer Name</th><th>Account No</th><th>Balance</th><th>Email</th></tr></thead>
+                <tbody id="accTableBody"><tr><td colspan="4" style="text-align: center; padding: 30px; color: var(--text-muted);">Loading...</td></tr></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 🔥 THE PREMIUM CUSTOMER DETAILS MODAL 🔥 -->
+    <div id="customerModal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal()">✖</button>
+            <h2 id="mName" style="margin:0 0 5px 0; color:var(--primary); font-size: 24px;">Customer Name</h2>
+            <div style="color:var(--success); font-weight:600; font-size: 13px; margin-bottom: 20px;" id="mKyc">KYC: VERIFIED</div>
+            
+            <div class="modal-grid">
+                <div class="detail-box"><div class="detail-lbl">Account Number</div><div class="detail-val" id="mAcc" style="font-family: monospace; color:var(--primary);">123</div></div>
+                <div class="detail-box"><div class="detail-lbl">Current Balance</div><div class="detail-val" id="mBal" style="color:var(--success);">₹0</div></div>
+                <div class="detail-box"><div class="detail-lbl">Email Address</div><div class="detail-val" id="mEmail">email@x.com</div></div>
+                <div class="detail-box"><div class="detail-lbl">Contact Number</div><div class="detail-val" id="mPhone">999</div></div>
+                <div class="detail-box"><div class="detail-lbl">Aadhaar Number</div><div class="detail-val" id="mAadhar">1234</div></div>
+                <div class="detail-box"><div class="detail-lbl">Date of Birth</div><div class="detail-val" id="mDob">01/01/2000</div></div>
+                <div class="detail-box" style="grid-column: 1 / -1;"><div class="detail-lbl">Account Type</div><div class="detail-val" id="mType">SAVINGS</div></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = "http://localhost:8086/api/bank";
+        let allAccountsData =[]; // Store data globally to show in modal
+        
+        async function sendOtp() {
+            const email = document.getElementById('cEmail').value.trim();
+            const name = document.getElementById('cName').value.trim();
+            if(!email || !name) return alert("Name and Email are required!");
+            
+            document.getElementById('loader').style.display = "block";
+            try {
+                await fetch(`${API_BASE}/send-otp`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({email: email, purpose: "Account Creation"}) });
+                document.getElementById('loader').style.display = "none";
+                document.getElementById('stepForm').style.display = "none";
+                document.getElementById('stepVerify').style.display = "block";
+            } catch(e) { alert("Server error."); }
+        }
+
+        async function verifyAndCreate() {
+            const otp = document.getElementById('cOtp').value.trim();
+            if(!otp || otp.length < 6) return alert("Enter 6-digit OTP!");
+
+            const payload = {
+                customerName: document.getElementById('cName').value,
+                dob: document.getElementById('cDob').value,
+                contactNo: document.getElementById('cPhone').value,
+                mailId: document.getElementById('cEmail').value,
+                aadharNo: document.getElementById('cAadhaar').value
+            };
+
+            const res = await fetch(`${API_BASE}/admin/create-account`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            const data = await res.json();
+
+            if (data.status === 'SUCCESS') {
+                alert(`SUCCESS! Account created.\nA/C No: ${data.accountNo}`);
+                location.reload(); 
+            } else { alert("Error: Duplicate Phone/Email/Aadhaar!"); }
+        }
+
+        async function loadAccounts() {
+            const res = await fetch(`${API_BASE}/admin/all-accounts`);
+            allAccountsData = await res.json();
+            const tbody = document.getElementById('accTableBody');
+            tbody.innerHTML = "";
+            
+            allAccountsData.forEach((acc, index) => {
+                const dateStr = new Date(acc.date).toLocaleDateString('en-IN');
+                // 🔥 Onclick event passes the array index to open the modal
+                tbody.innerHTML += `<tr onclick="openModal(${index})">
+                    <td><strong style="color:var(--text-main); font-size:15px;">${acc.name}</strong><br><span style="font-size:11px; color:var(--text-muted);">Joined: ${dateStr}</span></td>
+                    <td><span class="acc-badge">${acc.accNo}</span></td>
+                    <td style="color:var(--success); font-weight:bold; font-size:15px;">₹ ${acc.balance.toLocaleString('en-IN')}</td>
+                    <td style="color:var(--text-muted); font-size:13px;">${acc.email}</td>
+                </tr>`;
+            });
+        }
+
+        // 🔥 MODAL LOGIC
+        function openModal(index) {
+            const acc = allAccountsData[index];
+            document.getElementById('mName').innerText = acc.name;
+            document.getElementById('mKyc').innerText = `✅ KYC: ${acc.kyc}`;
+            document.getElementById('mAcc').innerText = acc.accNo;
+            document.getElementById('mBal').innerText = `₹ ${acc.balance.toLocaleString('en-IN')}`;
+            document.getElementById('mEmail').innerText = acc.email;
+            document.getElementById('mPhone').innerText = acc.phone;
+            document.getElementById('mAadhar').innerText = acc.aadhar || 'N/A';
+            document.getElementById('mDob').innerText = acc.dob || 'N/A';
+            document.getElementById('mType').innerText = `${acc.type} ACCOUNT`;
+            
+            document.getElementById('customerModal').style.display = 'flex';
+        }
+        function closeModal() { document.getElementById('customerModal').style.display = 'none'; }
+
+        window.onload = loadAccounts;
+    </script>
+</body>
+</html>
